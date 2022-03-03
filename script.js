@@ -24,7 +24,7 @@ window.onload = async () => {
   const response = await fetch('http://localhost:5000/allExpenses', {
     method: 'GET'
   });
-  let result = await response.json();
+  const result = await response.json();
   allPosition = result.data;
   getSum();
   render();
@@ -48,7 +48,7 @@ const onClickButton = async () => {
         date: dateNow
       })
     });
-    let result = await response.json();
+    const result = await response.json();
     allPosition = result.data;
     countSum += +valueInputCash;
     valueInputPosition = '';
@@ -201,7 +201,7 @@ const deleteExpense = async (index, itemIdDel) => {
       'Content-Type': 'application/json;charset=utf-8',
     },
   });
-  let result = await response.json();
+  const result = await response.json();
   allPosition = result.data;
   countSum = null;
   getSum();
