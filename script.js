@@ -186,6 +186,9 @@ const updateDateValue = (event) => {
   let { date } = allPosition[activeEditPosition];
   if (date !== event.target.value) {
     let badDate = event.target.value.split('-');
+    if (badDate[0] < 2000 || badDate[0] > 2022 ) {
+      badDate[0] = '2022';
+    }
     let correctDate = `${badDate[2]}.${badDate[1]}.${badDate[0]}`; 
     allPosition[activeEditPosition].date = correctDate;
   }
@@ -200,6 +203,8 @@ const deleteExpense = async (index, itemIdDel) => {
   });
   let result = await response.json();
   allPosition = result.data;
+  countSum = null;
+  getSum();
   render();
 }
 
