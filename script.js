@@ -16,29 +16,47 @@ const options = {
 
 const dateNow = newDate.toLocaleString("ru", options)
 
-window.onload = () => {
+window.onload = async () => {
   inputPosition = document.getElementById('add-position');
   inputCash = document.getElementById('add-cash');
   inputPosition.addEventListener('change', updateValuePosition);
   inputCash.addEventListener('change', updateValueCash);
+  const response = await fetch('http://localhost:5000/allExpenses', {
+    method: 'GET'
+  });
+  let result = await response.json();
+  allPosition = result.data;
+  getSum();
+  render();
 }
 
 const updateValuePosition = (event) => valueInputPosition = event.target.value;
 
 const updateValueCash = (event) => valueInputCash = event.target.value;
 
-const onClickButton = () => {
-  allPosition.push({
-    text: valueInputPosition,
-    cach: valueInputCash,
-    date: dateNow
-  });
-  countSum += +valueInputCash;
-  valueInputPosition = '';
-  valueInputCash = '';
-  inputPosition.value = '';
-  inputCash.value = '';
-  render();
+const onClickButton = async () => {
+  if (inputPosition.value != '' && inputCash.value != '') {
+    const response = await fetch('http://localhost:5000/createExpense', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({
+        text: valueInputPosition,
+        cach: valueInputCash,
+        date: dateNow
+      })
+    });
+    let result = await response.json();
+    allPosition = result.data;
+    countSum += +valueInputCash;
+    valueInputPosition = '';
+    valueInputCash = '';
+    inputPosition.value = '';
+    inputCash.value = '';
+    render();
+  }
 }
 
 const render = () => {
@@ -103,8 +121,8 @@ const render = () => {
       const imageDone = document.createElement('img');
       imageDone.src = 'img/done.png';
       imageDone.onclick = () => {
-        doneEditPosition();
         updateAllValue();
+        doneEditPosition();
       }
       container.appendChild(imageDone);
     } else {
@@ -121,15 +139,30 @@ const render = () => {
     imageDelete.src = 'img/delete.png';
     imageDelete.onclick = () => {
       const itemIdDel = item._id;
-      deleteTask(index, itemIdDel);
+      deleteExpense(index, itemIdDel);
+      render();
     }
     container.appendChild(imageDelete);
-
     content.appendChild(container);
   });
 }
 
-const updateAllValue = (event) => {
+const updateAllValue = async (event) => {
+  let { _id, text, cach, date } = allPosition[activeEditPosition];
+  const response = await fetch('http://localhost:5000/updateExpense', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+    body: JSON.stringify({
+      _id,
+      text,
+      cach,
+      date
+    })
+  });
+  let result = await response.json();
+  allPosition = result.data;
   countSum = null;
   getSum();
   render();
@@ -156,6 +189,18 @@ const updateDateValue = (event) => {
     let correctDate = `${badDate[2]}.${badDate[1]}.${badDate[0]}`; 
     allPosition[activeEditPosition].date = correctDate;
   }
+}
+
+const deleteExpense = async (index, itemIdDel) => {
+  const response = await fetch(`http://localhost:5000/deleteExpense?id=${itemIdDel}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  });
+  let result = await response.json();
+  allPosition = result.data;
+  render();
 }
 
 const getSum = () => {
