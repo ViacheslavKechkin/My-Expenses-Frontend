@@ -5,6 +5,8 @@ let inputPosition = null;
 let inputCash = null;
 let activeEditPosition = null;
 let countSum = 0;
+let intermediateResultCash = '';
+let intermediateResultText = '';
 
 const newDate = new Date();
 
@@ -35,7 +37,9 @@ const updateValuePosition = (event) => valueInputPosition = event.target.value;
 const updateValueCash = (event) => valueInputCash = event.target.value;
 
 const onClickButton = async () => {
-  if (inputPosition.value != '' && inputCash.value != '') {
+  if (inputPosition.value === '' || inputCash.value === '') {
+    alert(`Недостаточно данных для ввода расходов.\nВведите пожалуйста все данные о расходах`)
+  } else {
     const response = await fetch('http://localhost:5000/createExpense', {
       method: 'POST',
       headers: {
@@ -149,6 +153,9 @@ const render = () => {
 
 const updateAllValue = async (event) => {
   let { _id, text, cach, date } = allPosition[activeEditPosition];
+  cach = intermediateResultCash;
+  text = intermediateResultText;
+  
   const response = await fetch('http://localhost:5000/updateExpense', {
     method: 'PATCH',
     headers: {
@@ -171,14 +178,14 @@ const updateAllValue = async (event) => {
 const updateTextValue = (event) => {
   let { text } = allPosition[activeEditPosition];
   if (text !== event.target.value) {
-    allPosition[activeEditPosition].text = event.target.value;
+    intermediateResultText = event.target.value;
   }
 }
 
 const updateCachValue = (event) => {
   let { cach } = allPosition[activeEditPosition];
   if (cach !== event.target.value) {
-    allPosition[activeEditPosition].cach = event.target.value;
+    intermediateResultCash = event.target.value;
   }
 }
 
@@ -186,10 +193,10 @@ const updateDateValue = (event) => {
   let { date } = allPosition[activeEditPosition];
   if (date !== event.target.value) {
     let badDate = event.target.value.split('-');
-    if (badDate[0] < 2000 || badDate[0] > 2022 ) {
+    if (badDate[0] < 2000 || badDate[0] > 2022) {
       badDate[0] = '2022';
     }
-    let correctDate = `${badDate[2]}.${badDate[1]}.${badDate[0]}`; 
+    let correctDate = `${badDate[2]}.${badDate[1]}.${badDate[0]}`;
     allPosition[activeEditPosition].date = correctDate;
   }
 }
