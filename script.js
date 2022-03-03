@@ -5,7 +5,13 @@ let inputPosition = null;
 let inputCash = null;
 let activeEditPosition = null;
 let countSum = 0;
-let newTextValue = '';
+const newDate = new Date();
+const options = {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+}
+const dateNow = newDate.toLocaleString("ru", options)
 
 window.onload = () => {
   inputPosition = document.getElementById('add-position');
@@ -13,6 +19,7 @@ window.onload = () => {
   inputPosition.addEventListener('change', updateValuePosition);
   inputCash.addEventListener('change', updateValueCash);
 }
+
 const updateValuePosition = (event) => valueInputPosition = event.target.value;
 const updateValueCash = (event) => valueInputCash = event.target.value;
 
@@ -20,7 +27,7 @@ const onClickButton = () => {
   allPosition.push({
     text: valueInputPosition,
     cach: valueInputCash,
-    date: '01.02.2022'
+    date: dateNow
   });
   countSum += +valueInputCash;
   valueInputPosition = '';
@@ -30,7 +37,7 @@ const onClickButton = () => {
   render();
 }
 
-render = () => {
+const render = () => {
   const content = document.getElementById('content-page');
   const Sum = document.getElementById('totalSum');
   while (content.firstChild) {
@@ -55,22 +62,23 @@ render = () => {
       const inputText = document.createElement('input');
       inputText.type = 'text';
       inputText.value = item.text;
-      inputText.addEventListener('change', updateTextValue(item.text));
-      console.log(item.text);
+      inputText.className = 'input-text';
+      inputText.addEventListener('change', updateTextValue);
       container.appendChild(inputText);
 
       const inputDate = document.createElement('input');
       inputDate.type = 'date';
-      inputDate.value = item.text;
-      // inputDate.addEventListener('change', updateTaskText);
+      inputDate.value = item.date;
+      inputDate.className = 'input-date';
+      inputDate.addEventListener('change', updateDateValue);
       container.appendChild(inputDate);
 
       const inputCach = document.createElement('input');
       inputCach.type = 'text';
       inputCach.value = item.cach;
-      // inputText.addEventListener('change', updateTaskText);
+      inputCach.className = 'input-cach';
+      inputCach.addEventListener('change', updateCachValue);
       container.appendChild(inputCach);
-
     } else {
       const text = document.createElement('p');
       text.innerText = (index + 1) + ") " + item.text;
@@ -83,18 +91,16 @@ render = () => {
       container.appendChild(data);
 
       const cach = document.createElement('p');
-      cach.innerText = item.cach;
+      cach.innerText = `${item.cach} р.`;
       cach.className = 'cach';
       container.appendChild(cach);
     }
-
-
     if (index === activeEditPosition) {
       const imageDone = document.createElement('img');
       imageDone.src = 'img/done.png';
       imageDone.onclick = () => {
+        doneEditPosition();
         updateAllValue();
-        doneEditTask();
       }
       container.appendChild(imageDone);
     } else {
@@ -107,7 +113,6 @@ render = () => {
       container.appendChild(imageEdit);
     }
 
-
     const imageDelete = document.createElement('img');
     imageDelete.src = 'img/delete.png';
     imageDelete.onclick = () => {
@@ -116,19 +121,43 @@ render = () => {
     }
     container.appendChild(imageDelete);
 
-
     content.appendChild(container);
   });
 }
 
 const updateAllValue = (event) => {
-  let { text, cach, date } = allPosition[activeEditPosition];
-  console.log(newTextValue);
-  text = newTextValue;
+  countSum = null;
+  getSum();
   render();
 }
-const updateTextValue = (text) => {
-  newTextValue = text;
-  console.log(newTextValue);
+
+const updateTextValue = (event) => {
+  let { text } = allPosition[activeEditPosition];
+  if (text !== event.target.value) {
+    allPosition[activeEditPosition].text = event.target.value;
+  }
 }
-const doneEditTask = () => activeEditPosition = null;
+
+const updateCachValue = (event) => {
+  let { cach } = allPosition[activeEditPosition];
+  if (cach !== event.target.value) {
+    allPosition[activeEditPosition].cach = event.target.value;
+  }
+}
+
+const updateDateValue = (event) => {
+  let { date } = allPosition[activeEditPosition];
+  if (date !== event.target.value) {
+    let badDate = event.target.value;
+    let dateReplace = badDate.replaceAll('-', '.');
+    allPosition[activeEditPosition].date = dateReplace;
+    console.log(dateReplace);
+  }
+}
+
+const getSum = () => {
+  allPosition.map(item => countSum += +item.cach);
+  render();
+}
+
+const doneEditPosition = () => activeEditPosition = null;
