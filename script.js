@@ -5,12 +5,15 @@ let inputPosition = null;
 let inputCash = null;
 let activeEditPosition = null;
 let countSum = 0;
+
 const newDate = new Date();
+
 const options = {
   year: 'numeric',
   month: 'numeric',
   day: 'numeric',
 }
+
 const dateNow = newDate.toLocaleString("ru", options)
 
 window.onload = () => {
@@ -21,6 +24,7 @@ window.onload = () => {
 }
 
 const updateValuePosition = (event) => valueInputPosition = event.target.value;
+
 const updateValueCash = (event) => valueInputCash = event.target.value;
 
 const onClickButton = () => {
@@ -148,10 +152,9 @@ const updateCachValue = (event) => {
 const updateDateValue = (event) => {
   let { date } = allPosition[activeEditPosition];
   if (date !== event.target.value) {
-    let badDate = event.target.value;
-    let dateReplace = badDate.replaceAll('-', '.');
-    allPosition[activeEditPosition].date = dateReplace;
-    console.log(dateReplace);
+    let badDate = event.target.value.split('-');
+    let correctDate = `${badDate[2]}.${badDate[1]}.${badDate[0]}`; 
+    allPosition[activeEditPosition].date = correctDate;
   }
 }
 
