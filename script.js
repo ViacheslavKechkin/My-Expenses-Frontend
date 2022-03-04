@@ -89,12 +89,13 @@ const render = () => {
       inputText.type = 'text';
       inputText.value = item.text;
       inputText.className = 'input-text';
-      inputText.addEventListener('change', updateTextValue);
+      inputText.onchange = (event) => intermediateResultText = event.target.value;
       container.appendChild(inputText);
 
       const inputDate = document.createElement('input');
       inputDate.type = 'date';
-      inputDate.value = item.date;
+      inputDate.value = ((item.date).split('.').reverse().join('-'));
+      inputDate.setAttribute("min", '2000-01-01');
       inputDate.className = 'input-date';
       inputDate.addEventListener('change', updateDateValue);
       container.appendChild(inputDate);
@@ -103,8 +104,22 @@ const render = () => {
       inputCach.type = 'text';
       inputCach.value = item.cach;
       inputCach.className = 'input-cach';
-      inputCach.addEventListener('change', updateCachValue);
+      inputCach.onchange = (event) => intermediateResultCash = event.target.value;
+
       container.appendChild(inputCach);
+      const imageDone = document.createElement('img');
+      imageDone.src = 'img/done.png';
+      imageDone.onclick = () => {
+        saveResult(index);
+      }
+      container.appendChild(imageDone);
+      const imageCancel = document.createElement('img');
+      imageCancel.src = 'img/delete.png';
+      imageCancel.onclick = () => {
+        activeEditPosition = null;
+        render();
+      }
+      container.appendChild(imageCancel);
     } else {
       const text = document.createElement('p');
       text.innerText = (index + 1) + ") " + item.text;
@@ -120,57 +135,58 @@ const render = () => {
       cach.innerText = `${item.cach} р.`;
       cach.className = 'cach';
       container.appendChild(cach);
-    }
-    if (index === activeEditPosition) {
-      const imageDone = document.createElement('img');
-      imageDone.src = 'img/done.png';
-      imageDone.onclick = () => {
-        updateAllValue();
-        doneEditPosition();
-      }
-      container.appendChild(imageDone);
-    } else {
+
       const imageEdit = document.createElement('img');
       imageEdit.src = 'img/edit.png';
       imageEdit.onclick = () => {
+
+        let { cach, text } = allPosition[index];
         activeEditPosition = index;
+        intermediateResultCash = cach;
+        intermediateResultText = text;
         render();
       }
       container.appendChild(imageEdit);
+
+      const imageDelete = document.createElement('img');
+      imageDelete.src = 'img/delete.png';
+      imageDelete.onclick = () => {
+        const itemIdDel = item._id;
+        deleteExpense(index, itemIdDel);
+        render();
+      }
+      container.appendChild(imageDelete);
     }
 
-    const imageDelete = document.createElement('img');
-    imageDelete.src = 'img/delete.png';
-    imageDelete.onclick = () => {
-      const itemIdDel = item._id;
-      deleteExpense(index, itemIdDel);
-      render();
-    }
-    container.appendChild(imageDelete);
     content.appendChild(container);
   });
 }
 
-const updateAllValue = async (event) => {
-  let { _id, text, cach, date } = allPosition[activeEditPosition];
-  cach = intermediateResultCash;
-  text = intermediateResultText;
-  
+const saveResult = (ind) => {
+  let task = allPosition[ind];
+  allPosition[ind] = {
+    ...task,
+    cach: intermediateResultCash,
+    text: intermediateResultText
+  }
+
+  updateAllValue(allPosition[ind])
+}
+
+const updateAllValue = async (task) => {
+
   const response = await fetch('http://localhost:5000/updateExpense', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
     },
-    body: JSON.stringify({
-      _id,
-      text,
-      cach,
-      date
-    })
+    body: JSON.stringify(task)
   });
   let result = await response.json();
   allPosition = result.data;
+
   countSum = null;
+  activeEditPosition = null;
   getSum();
   render();
 }
@@ -182,20 +198,10 @@ const updateTextValue = (event) => {
   }
 }
 
-const updateCachValue = (event) => {
-  let { cach } = allPosition[activeEditPosition];
-  if (cach !== event.target.value) {
-    intermediateResultCash = event.target.value;
-  }
-}
-
 const updateDateValue = (event) => {
   let { date } = allPosition[activeEditPosition];
   if (date !== event.target.value) {
     let badDate = event.target.value.split('-');
-    if (badDate[0] < 2000 || badDate[0] > 2022) {
-      badDate[0] = '2022';
-    }
     let correctDate = `${badDate[2]}.${badDate[1]}.${badDate[0]}`;
     allPosition[activeEditPosition].date = correctDate;
   }
@@ -212,6 +218,7 @@ const deleteExpense = async (index, itemIdDel) => {
   allPosition = result.data;
   countSum = null;
   getSum();
+  activeEditPosition = null
   render();
 }
 
@@ -219,5 +226,3 @@ const getSum = () => {
   allPosition.map(item => countSum += +item.cach);
   render();
 }
-
-const doneEditPosition = () => activeEditPosition = null;

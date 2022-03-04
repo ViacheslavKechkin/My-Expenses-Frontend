@@ -15,7 +15,6 @@ p {
   padding-bottom: 3px;
   font-family: sans-serif;
   font-size: 17px;
-  opacity: 0.5;
 }
 
 img {
@@ -26,7 +25,7 @@ img {
 }
 
 .wrapper {
-  width: 650px;
+  width: 660px;
   margin: auto;
   display: flex;
   flex-direction: column;
