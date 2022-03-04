@@ -95,7 +95,8 @@ const render = () => {
       const inputDate = document.createElement('input');
       inputDate.type = 'date';
       inputDate.value = ((item.date).split('.').reverse().join('-'));
-      inputDate.setAttribute("min", '2000-01-01');
+      inputDate.min = '2000-01-01';
+      inputDate.min = '2022-12-31';
       inputDate.className = 'input-date';
       inputDate.addEventListener('change', updateDateValue);
       container.appendChild(inputDate);
@@ -114,7 +115,7 @@ const render = () => {
       }
       container.appendChild(imageDone);
       const imageCancel = document.createElement('img');
-      imageCancel.src = 'img/delete.png';
+      imageCancel.src = 'img/cansel.png';
       imageCancel.onclick = () => {
         activeEditPosition = null;
         render();
